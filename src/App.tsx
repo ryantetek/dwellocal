@@ -4,6 +4,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { DemoProvider } from "@/contexts/DemoContext";
 import { PropertyProvider } from "@/contexts/PropertyContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { HashScroll } from "@/components/SiteHeader";
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import { HomePage } from "@/pages/marketing/HomePage";
 import { PrivacyPage, TermsPage } from "@/pages/legal/LegalPages";
@@ -58,6 +59,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Toaster richColors position="top-center" />
+        <HashScroll />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/terms" element={<TermsPage />} />

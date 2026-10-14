@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useReducedMotion } from "framer-motion";
 import {
@@ -13,16 +13,16 @@ import {
   ShieldCheck,
   Wallet,
 } from "lucide-react";
-import { DwellocalLogo } from "@/components/DwellocalLogo";
 import { FadeIn } from "@/components/FadeIn";
 import { SiteFooter } from "@/components/SiteFooter";
+import { SiteHeader } from "@/components/SiteHeader";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TEMPLATE_META } from "@/lib/templates";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
-import { cn, RESERVED_SLUGS, slugify, slugifyLive } from "@/lib/utils";
+import { RESERVED_SLUGS, slugify, slugifyLive } from "@/lib/utils";
 
 const PRODUCT =
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80";
@@ -58,7 +58,6 @@ const workspacePoints = [
 export function HomePage() {
   const navigate = useNavigate();
   const reduce = useReducedMotion();
-  const [scrolled, setScrolled] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [propertyName, setPropertyName] = useState("");
@@ -68,13 +67,6 @@ export function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const host = typeof window !== "undefined" ? window.location.host : "dwellocal.com";
   const previewSlug = slugify(slug) || "your-address";
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
@@ -125,41 +117,7 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen bg-[#FAF8F3] text-dwell-charcoal">
-      <header
-        className={cn(
-          "fixed inset-x-0 top-0 z-40 transition-all duration-300",
-          scrolled ? "border-b border-dwell-sand/80 bg-white/85 backdrop-blur-md" : "bg-transparent",
-        )}
-      >
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8">
-          <Link to="/" aria-label="Dwellocal home">
-            <DwellocalLogo size="lg" />
-          </Link>
-          <nav className="hidden items-center gap-8 text-base text-dwell-muted md:flex">
-            <a href="#product" className="hover:text-dwell-charcoal">
-              Product
-            </a>
-            <a href="#how" className="hover:text-dwell-charcoal">
-              How it works
-            </a>
-            <a href="#templates" className="hover:text-dwell-charcoal">
-              Templates
-            </a>
-            <Link to="/demo" className="hover:text-dwell-charcoal">
-              Demo
-            </Link>
-            <Link to="/login" className="hover:text-dwell-charcoal">
-              Log in
-            </Link>
-            <Button asChild size="lg">
-              <a href="#signup">Get started</a>
-            </Button>
-          </nav>
-          <Button asChild size="lg" className="md:hidden">
-            <a href="#signup">Get started</a>
-          </Button>
-        </div>
-      </header>
+      <SiteHeader />
 
       <section className="relative overflow-hidden px-6 pb-24 pt-36 lg:px-8 md:pb-32 md:pt-44">
         <div className="pointer-events-none absolute -right-24 top-10 h-[28rem] w-[28rem] rounded-full bg-dwell-sage/50 blur-3xl" />
@@ -220,7 +178,7 @@ export function HomePage() {
             ["Property page", "Photos and details for guests"],
             ["Calendar", "Who is staying, and when"],
             ["Financial tracker", "What came in and what went out"],
-            ["Welcome sheet", "Wifi and door notes for arrivals"],
+            ["Welcome Guide", "Stay information in a QR code "],
           ].map(([k, v]) => (
             <div key={k}>
               <p className="font-heading text-xl font-semibold">{k}</p>
@@ -285,7 +243,7 @@ export function HomePage() {
               {
                 icon: QrCode,
                 title: "Arrival guide",
-                copy: "Wifi, the door, check-in time, and stay rules — behind a QR code.",
+                copy: "Wifi and door access, house rules and other info — on a QR code.",
                 span: "md:col-span-2",
               },
             ].map((item, i) => (

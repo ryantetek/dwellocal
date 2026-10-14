@@ -2,9 +2,8 @@ import { Link } from "react-router-dom";
 import { ArrowRight, KeyRound, LayoutDashboard, LayoutTemplate } from "lucide-react";
 import { GuestGuideView } from "@/components/property/GuestGuideView";
 import { TemplateRenderer } from "@/components/property/TemplateRenderer";
-import { DwellocalLogo } from "@/components/DwellocalLogo";
 import { SiteFooter } from "@/components/SiteFooter";
-import { Button } from "@/components/ui/button";
+import { SiteHeader } from "@/components/SiteHeader";
 import { demoBundle } from "@/data/demo";
 
 const paths = [
@@ -43,21 +42,9 @@ const paths = [
 export function DemoLandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-[#FAF8F3] text-dwell-charcoal">
-      <div className="absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-dwell-sage/40 to-transparent" />
-      <header className="relative mx-auto flex max-w-7xl items-center justify-between px-6 py-8 lg:px-8">
-        <Link to="/" aria-label="Dwellocal home">
-          <DwellocalLogo size="lg" />
-        </Link>
-        <div className="flex items-center gap-5">
-          <Link to="/login" className="hidden text-base text-dwell-muted hover:text-dwell-charcoal md:inline">
-            Log in
-          </Link>
-          <Button asChild size="lg">
-            <Link to="/#signup">Start free</Link>
-          </Button>
-        </div>
-      </header>
-      <main className="relative mx-auto w-full max-w-7xl flex-1 px-6 pb-28 pt-6 lg:px-8">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-96 bg-gradient-to-b from-dwell-sage/40 to-transparent" />
+      <SiteHeader />
+      <main className="relative mx-auto w-full max-w-7xl flex-1 px-6 pb-28 pt-32 lg:px-8 md:pt-36">
         <p className="text-base font-medium text-dwell-deep">Sample property · look around, nothing is saved</p>
         <h1 className="mt-5 max-w-4xl font-heading text-5xl font-bold tracking-tight md:text-7xl">
           Click through the same three places your guests and you will use.
