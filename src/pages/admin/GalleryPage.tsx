@@ -15,7 +15,6 @@ export function GalleryPage() {
   const { current } = useProperties();
   const { isDemo } = useDemo();
   const { plan } = useAuth();
-  const upgradeTo = isDemo ? "/demo/admin/upgrade" : "/admin/upgrade";
   const [items, setItems] = useState<GalleryMedia[]>([]);
 
   useEffect(() => {
@@ -99,9 +98,9 @@ export function GalleryPage() {
           </div>
         ))}
       </div>
-      {plan.plan === "free" ? (
+      {!isDemo && plan.plan === "free" ? (
         <Button asChild variant="slate" className="mt-6">
-          <Link to={upgradeTo}>Upgrade for 20 uploads</Link>
+          <Link to="/admin/upgrade">Upgrade for 20 uploads</Link>
         </Button>
       ) : null}
     </div>

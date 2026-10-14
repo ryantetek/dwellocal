@@ -58,7 +58,7 @@ export const TEMPLATE_META: TemplateMeta[] = [
     description: "Spare, gallery-like, and focused on space.",
     tier: "pro",
     preview:
-      "https://images.unsplash.com/photo-1505691938895-1758d7a779f0?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: "luxe",
@@ -74,7 +74,7 @@ export const TEMPLATE_META: TemplateMeta[] = [
     description: "Soft light, pale woods, and calm winter warmth.",
     tier: "pro",
     preview:
-      "https://images.unsplash.com/photo-1512917774080-9991f1c4c313?auto=format&fit=crop&w=1200&q=80",
+      "https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=1200&q=80",
   },
   {
     id: "heritage",

@@ -67,9 +67,9 @@ export function SettingsPage() {
           />
           Hide “Powered by Dwellocal”
         </label>
-        {!plan.hideBranding ? (
+        {!isDemo && !plan.hideBranding ? (
           <Button asChild variant="slate" size="sm" className="mt-3">
-            <Link to={isDemo ? "/demo/admin/upgrade" : "/admin/upgrade"}>Upgrade to hide branding</Link>
+            <Link to="/admin/upgrade">Upgrade to hide branding</Link>
           </Button>
         ) : null}
         <Button variant="slate" className="mt-6" onClick={() => void save()}>

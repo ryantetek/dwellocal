@@ -9,6 +9,7 @@ import { useDemo } from "@/contexts/DemoContext";
 import { useProperties } from "@/contexts/PropertyContext";
 import { demoBundle } from "@/data/demo";
 import { ICON_OPTIONS, getIcon } from "@/lib/icons";
+import { getSocialIcon } from "@/lib/socialIcons";
 import { supabase } from "@/lib/supabase";
 import type { Amenity, HouseRule, SiteSetting, SocialLink } from "@/types/database";
 
@@ -133,7 +134,7 @@ export function CmsPage() {
         demo={isDemo}
       />
       <ListEditor
-        title="House rules"
+        title="Stay rules"
         rows={rules}
         onChange={setRules}
         fields={["title", "description"]}
@@ -184,21 +185,24 @@ function ListEditor<T extends { id: string; icon?: string }>({
       <h2 className="font-heading font-semibold">{title}</h2>
       <div className="mt-4 space-y-4">
         {rows.map((row, index) => {
-          const Icon = getIcon(row.icon);
+          const isSocial = table === "social_links";
+          const platform = String((row as { platform?: string }).platform ?? "");
+          const Icon = isSocial ? getSocialIcon(platform, row.icon) : getIcon(row.icon);
+          const iconChoices = isSocial ? ["instagram", "facebook", "tiktok", ...ICON_OPTIONS] : ICON_OPTIONS;
           return (
             <div key={row.id} className="grid gap-3 rounded-[12px] border border-slate-100 p-3 md:grid-cols-4">
               <div className="flex items-center gap-2">
-                <Icon className="h-4 w-4 text-slate-500" />
+                <Icon className="h-4 w-4 shrink-0 text-slate-500" />
                 <select
                   className="h-10 w-full rounded-[12px] border border-slate-200 px-2 text-sm"
-                  value={row.icon ?? "home"}
+                  value={row.icon ?? (isSocial ? "instagram" : "home")}
                   onChange={(e) => {
                     const next = [...rows];
                     next[index] = { ...row, icon: e.target.value };
                     onChange(next);
                   }}
                 >
-                  {ICON_OPTIONS.map((name) => (
+                  {iconChoices.map((name) => (
                     <option key={name} value={name}>
                       {name}
                     </option>
@@ -212,7 +216,12 @@ function ListEditor<T extends { id: string; icon?: string }>({
                   value={String((row as Record<string, unknown>)[field] ?? "")}
                   onChange={(e) => {
                     const next = [...rows];
-                    next[index] = { ...row, [field]: e.target.value };
+                    const value = e.target.value;
+                    const extra =
+                      isSocial && field === "platform"
+                        ? { icon: value.toLowerCase().replace(/\s+/g, "") }
+                        : {};
+                    next[index] = { ...row, [field]: value, ...extra };
                     onChange(next);
                   }}
                 />

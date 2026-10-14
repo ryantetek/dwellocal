@@ -12,7 +12,7 @@ export function TemplatesPage() {
   const { current, refresh } = useProperties();
   const { plan } = useAuth();
   const { isDemo } = useDemo();
-  const upgradeTo = isDemo ? "/demo/admin/upgrade" : "/admin/upgrade";
+  const catalog = isDemo ? TEMPLATE_META.filter((tpl) => tpl.tier === "free") : TEMPLATE_META;
 
   async function select(id: string) {
     if (isDemo) return toast.message("Demo is read-only.");
@@ -34,11 +34,11 @@ export function TemplatesPage() {
       <h1 className="font-heading text-2xl font-bold">Templates</h1>
       <p className="text-sm text-slate-500">Current: {current?.template}</p>
       <div className="mt-6 grid gap-4 md:grid-cols-3">
-        {TEMPLATE_META.map((tpl) => {
-          const locked = tpl.tier === "pro" && !plan.allTemplates;
+        {catalog.map((tpl) => {
+          const locked = !isDemo && tpl.tier === "pro" && !plan.allTemplates;
           return (
             <div key={tpl.id} className="overflow-hidden rounded-[16px] border border-slate-200 bg-white">
-              <img src={tpl.preview} alt="" className="h-36 w-full object-cover" />
+              <img src={tpl.preview} alt="" className="h-36 w-full bg-slate-100 object-cover" />
               <div className="p-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-heading font-semibold">{tpl.name}</h3>
@@ -47,7 +47,7 @@ export function TemplatesPage() {
                 <p className="mt-2 text-sm text-slate-500">{tpl.description}</p>
                 {locked ? (
                   <Button asChild size="sm" variant="slate" className="mt-3">
-                    <Link to={upgradeTo}>Upgrade</Link>
+                    <Link to="/admin/upgrade">Upgrade</Link>
                   </Button>
                 ) : (
                   <Button size="sm" variant="slate-outline" className="mt-3" onClick={() => void select(tpl.id)}>

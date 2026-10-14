@@ -5,13 +5,36 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function slugify(value: string) {
+export const RESERVED_SLUGS = new Set([
+  "admin",
+  "demo",
+  "login",
+  "register",
+  "verify",
+  "terms",
+  "privacy",
+  "forgot-password",
+  "reset-password",
+  "pending-approval",
+  "after-login",
+  "upgrade",
+  "super-admin",
+  "guide",
+  "api",
+  "app",
+]);
+
+export function slugifyLive(value: string) {
   return value
     .toLowerCase()
-    .trim()
     .replace(/[^\w\s-]/g, "")
-    .replace(/[\s_-]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+    .replace(/[\s_]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-+/, "");
+}
+
+export function slugify(value: string) {
+  return slugifyLive(value).replace(/-+$/g, "").trim();
 }
 
 export function formatCurrency(amount: number, currency = "USD") {

@@ -118,13 +118,14 @@ export function VerifyOtpPage() {
       return;
     }
     const propertyName = (data.user.user_metadata?.property_name as string | undefined) || "My property";
+    const propertySlug = data.user.user_metadata?.property_slug as string | undefined;
     const { count } = await supabase
       .from("properties")
       .select("id", { count: "exact", head: true })
       .eq("user_id", data.user.id);
     if (!count) {
       try {
-        await createPropertyWithSeed({ userId: data.user.id, name: propertyName });
+        await createPropertyWithSeed({ userId: data.user.id, name: propertyName, slug: propertySlug });
       } catch {
         /* profile trigger may still be settling */
       }

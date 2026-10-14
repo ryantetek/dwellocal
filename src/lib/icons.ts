@@ -1,10 +1,12 @@
 import {
+  Ban,
   Bath,
   BedDouble,
   Bike,
   CalendarDays,
   Car,
   ChefHat,
+  Clock,
   Coffee,
   ConciergeBell,
   Droplets,
@@ -23,6 +25,7 @@ import {
   Mountain,
   ParkingCircle,
   PawPrint,
+  Recycle,
   Shirt,
   ShowerHead,
   Sofa,
@@ -79,6 +82,9 @@ export const ICON_MAP: Record<string, LucideIcon> = {
   droplets: Droplets,
   shirt: Shirt,
   layout: LayoutGrid,
+  ban: Ban,
+  recycle: Recycle,
+  clock: Clock,
 };
 
 export type IconName = keyof typeof ICON_MAP;

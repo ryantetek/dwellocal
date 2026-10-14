@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { motion, useReducedMotion } from "framer-motion";
+import { useReducedMotion } from "framer-motion";
 import {
+  ArrowRight,
   CalendarDays,
+  Check,
+  ImageIcon,
   LayoutTemplate,
+  Link2,
+  Mail,
   MessageCircle,
   QrCode,
   ShieldCheck,
@@ -11,48 +16,44 @@ import {
 } from "lucide-react";
 import { DwellocalLogo } from "@/components/DwellocalLogo";
 import { FadeIn } from "@/components/FadeIn";
+import { SiteFooter } from "@/components/SiteFooter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { TEMPLATE_META } from "@/lib/templates";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
-import { cn } from "@/lib/utils";
+import { cn, RESERVED_SLUGS, slugify, slugifyLive } from "@/lib/utils";
 
-const HERO =
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2400&q=80";
+const PRODUCT =
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&q=80";
 
-const features = [
+const steps = [
   {
-    icon: LayoutTemplate,
-    title: "Public landing page",
-    copy: "A one-page showcase for each property — photography, amenities, house rules, and enquiries.",
+    n: "01",
+    title: "Tell us the property name",
+    copy: "That’s it to begin. We start a page you can fill in, like a simple photo album with words.",
   },
   {
-    icon: ShieldCheck,
-    title: "Admin dashboard",
-    copy: "A private host portal for occupancy, content, messages, and the books — without payment processors.",
+    n: "02",
+    title: "Add photos and property notes",
+    copy: "Pictures, what the property has, the stay rules, and a form so people can ask about dates.",
   },
   {
-    icon: CalendarDays,
-    title: "Reservation calendar",
-    copy: "Month view with multi-day stays, guest details, and a unique guest-guide QR for each booking.",
+    n: "03",
+    title: "Use it when guests stay",
+    copy: "See who’s coming, share a welcome sheet for arrivals, and jot down money in and money out.",
   },
-  {
-    icon: Wallet,
-    title: "Income & expense ledgers",
-    copy: "Simple, manual accounting so you can see the house clearly. No live payment rails.",
-  },
-  {
-    icon: LayoutTemplate,
-    title: "Switchable templates",
-    copy: "Classic, Modern, and Coastal included. Pro unlocks Editorial, Minimal, Luxe, Nordic, Heritage, Tropic.",
-  },
-  {
-    icon: MessageCircle,
-    title: "Guest messaging",
-    copy: "An enquiry widget on the public page, with a quiet inbox in admin for replies.",
-  },
+];
+
+const workspacePoints = [
+  { icon: Mail, text: "Sign up with email, Google, or Facebook — whichever you already use" },
+  { icon: LayoutTemplate, text: "We start a page for your property. You add photos and words when you’re ready" },
+  { icon: ShieldCheck, text: "A person on our team checks new accounts before they go live" },
+  { icon: ImageIcon, text: "Change photos, stay rules, and check-in notes without a web designer" },
+  { icon: CalendarDays, text: "See who’s staying, and on which days, on a simple calendar" },
+  { icon: Wallet, text: "Keep a record of money in and money out. We never take guest payments" },
+  { icon: Link2, text: "Share one link. Guests don’t need an app" },
 ];
 
 export function HomePage() {
@@ -62,11 +63,15 @@ export function HomePage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [propertyName, setPropertyName] = useState("");
+  const [slug, setSlug] = useState("");
+  const [slugEdited, setSlugEdited] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const host = typeof window !== "undefined" ? window.location.host : "dwellocal.com";
+  const previewSlug = slugify(slug) || "your-address";
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 16);
+    const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -75,6 +80,15 @@ export function HomePage() {
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    const webAddress = slugify(slug);
+    if (!webAddress) {
+      setError("Choose a web address for your property page.");
+      return;
+    }
+    if (RESERVED_SLUGS.has(webAddress)) {
+      setError("That web address is reserved. Please choose another.");
+      return;
+    }
     if (!isSupabaseConfigured || !supabase) {
       setError("Connect Supabase to create an account. You can explore the demo in the meantime.");
       return;
@@ -85,7 +99,7 @@ export function HomePage() {
         email,
         password,
         options: {
-          data: { property_name: propertyName, full_name: propertyName },
+          data: { property_name: propertyName, property_slug: webAddress, full_name: propertyName },
           emailRedirectTo: `${window.location.origin}/verify`,
         },
       });
@@ -111,219 +125,308 @@ export function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-dwell-beige text-dwell-charcoal">
+    <div className="min-h-screen bg-[#FAF8F3] text-dwell-charcoal">
       <header
         className={cn(
           "fixed inset-x-0 top-0 z-40 transition-all duration-300",
-          scrolled ? "border-b border-dwell-sand/70 bg-dwell-beige/80 backdrop-blur-md" : "bg-transparent",
+          scrolled ? "border-b border-dwell-sand/80 bg-white/85 backdrop-blur-md" : "bg-transparent",
         )}
       >
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 lg:px-8">
           <Link to="/" aria-label="Dwellocal home">
-            <DwellocalLogo inverted={!scrolled} showTagline={false} />
+            <DwellocalLogo size="lg" />
           </Link>
-          <nav className="hidden items-center gap-7 text-sm md:flex">
-            {[
-              ["Features", "#features"],
-              ["Templates", "#templates"],
-              ["Demo", "#demo"],
-            ].map(([label, href]) => (
-              <a
-                key={label}
-                href={href}
-                className={cn("transition-opacity hover:opacity-80", scrolled ? "text-dwell-charcoal" : "text-white")}
-              >
-                {label}
-              </a>
-            ))}
-            <Link
-              to="/login"
-              className={cn("transition-opacity hover:opacity-80", scrolled ? "text-dwell-charcoal" : "text-white")}
-            >
+          <nav className="hidden items-center gap-8 text-base text-dwell-muted md:flex">
+            <a href="#product" className="hover:text-dwell-charcoal">
+              Product
+            </a>
+            <a href="#how" className="hover:text-dwell-charcoal">
+              How it works
+            </a>
+            <a href="#templates" className="hover:text-dwell-charcoal">
+              Templates
+            </a>
+            <Link to="/demo" className="hover:text-dwell-charcoal">
+              Demo
+            </Link>
+            <Link to="/login" className="hover:text-dwell-charcoal">
               Log in
             </Link>
-            <Button asChild size="sm">
+            <Button asChild size="lg">
               <a href="#signup">Get started</a>
             </Button>
           </nav>
-          <Button asChild size="sm" className="md:hidden">
+          <Button asChild size="lg" className="md:hidden">
             <a href="#signup">Get started</a>
           </Button>
         </div>
       </header>
 
-      <section className="relative min-h-[92vh] overflow-hidden">
-        <motion.img
-          src={HERO}
-          alt=""
-          className="absolute inset-0 h-full w-full object-cover"
-          initial={reduce ? false : { scale: 1.08 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 6, ease: [0.22, 1, 0.36, 1] }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-dwell-beige" />
-        <div className="relative mx-auto flex min-h-[92vh] max-w-6xl flex-col justify-end px-5 pb-24 pt-32">
+      <section className="relative overflow-hidden px-6 pb-24 pt-36 lg:px-8 md:pb-32 md:pt-44">
+        <div className="pointer-events-none absolute -right-24 top-10 h-[28rem] w-[28rem] rounded-full bg-dwell-sage/50 blur-3xl" />
+        <div className="pointer-events-none absolute -left-16 bottom-0 h-72 w-72 rounded-full bg-dwell-sand/80 blur-3xl" />
+        <div className="relative mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-[1.1fr_0.9fr]">
           <FadeIn>
-            <Badge className="bg-white/15 text-white backdrop-blur-sm">Property Management, Simplified.</Badge>
-            <h1 className="mt-5 max-w-3xl font-heading text-4xl font-bold leading-[1.1] text-white drop-shadow-sm md:text-6xl">
-              Your property. Your page. Your platform.
+            <Badge className="px-4 py-1.5 text-sm">Property Management, Simplified.</Badge>
+            <h1 className="mt-7 font-heading text-5xl font-bold leading-[1.05] tracking-tight md:text-7xl">
+              Your space, online —
+              <span className="block text-dwell-deep">without the fuss.</span>
             </h1>
-            <p className="mt-5 max-w-xl text-base text-white/85 md:text-lg">
-              A beautiful public showcase for each property, and a powerful private dashboard for reservations,
-              accounting, content, and enquiries.
+            <p className="mt-7 max-w-2xl text-lg leading-relaxed text-dwell-muted md:text-2xl md:leading-snug">
+              Guests get a beautiful page with photos, stay rules, and a way to ask about dates. You get one calm
+              place to keep bookings, messages, and a simple money list. No website skills needed.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="lg">
-                <a href="#signup">Get Started</a>
+            <div className="mt-10 flex flex-wrap gap-4">
+              <Button asChild size="xl">
+                <a href="#signup">Start free</a>
               </Button>
-              <Button asChild size="lg" variant="secondary">
-                <a href="#features">See How It Works</a>
+              <Button asChild size="xl" variant="outline">
+                <Link to="/demo">
+                  Try a sample property <ArrowRight className="h-5 w-5" />
+                </Link>
               </Button>
             </div>
-            <p className="mt-6 text-sm text-white/75">Free to start · No card required · No payment processing</p>
+            <ul className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-base text-dwell-muted">
+              {["Free to start", "No card needed", "We never take guest payments"].map((item) => (
+                <li key={item} className="flex items-center gap-2">
+                  <Check className="h-5 w-5 text-dwell-deep" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </FadeIn>
+          <FadeIn delay={reduce ? 0 : 0.08}>
+            <div className="rounded-[28px] border border-dwell-sand bg-white p-3 shadow-[0_32px_90px_-32px_rgba(23,26,25,0.4)]">
+              <div className="flex items-center gap-2 px-4 py-3">
+                <span className="h-3.5 w-3.5 rounded-full bg-dwell-sand" />
+                <span className="h-3.5 w-3.5 rounded-full bg-dwell-sand" />
+                <span className="h-3.5 w-3.5 rounded-full bg-dwell-sage" />
+                <span className="ml-3 rounded-full bg-dwell-beige px-4 py-1 text-sm text-dwell-muted">
+                  dwellocal.com/cedar-salt-house
+                </span>
+              </div>
+              <img
+                src={PRODUCT}
+                alt="A sample property page"
+                className="h-80 w-full rounded-[20px] object-cover md:h-[28rem]"
+              />
+            </div>
           </FadeIn>
         </div>
       </section>
 
-      <section className="border-y border-dwell-sand/80 bg-white/50">
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-5 py-10 md:grid-cols-4">
+      <section className="border-y border-dwell-sand bg-white">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-10 px-6 py-14 md:grid-cols-4 lg:px-8">
           {[
-            { icon: QrCode, label: "QR Guest Guide" },
-            { icon: CalendarDays, label: "Reservation calendar" },
-            { icon: Wallet, label: "Income & expense ledgers" },
-            { icon: ShieldCheck, label: "Built for hosts" },
-          ].map((item) => (
-            <div key={item.label} className="flex items-center gap-3 text-sm text-dwell-muted">
-              <item.icon className="h-5 w-5 text-dwell-deep" />
-              {item.label}
+            ["Property page", "Photos and details for guests"],
+            ["Calendar", "Who is staying, and when"],
+            ["Financial tracker", "What came in and what went out"],
+            ["Welcome sheet", "Wifi and door notes for arrivals"],
+          ].map(([k, v]) => (
+            <div key={k}>
+              <p className="font-heading text-xl font-semibold">{k}</p>
+              <p className="mt-2 text-base text-dwell-muted">{v}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section id="features" className="mx-auto max-w-6xl px-5 py-24">
+      <section id="how" className="mx-auto max-w-7xl px-6 py-28 lg:px-8">
         <FadeIn>
-          <p className="text-sm uppercase tracking-[0.18em] text-dwell-muted">Features</p>
-          <h2 className="mt-2 font-heading text-3xl font-bold md:text-4xl">Everything a host actually needs</h2>
+          <p className="text-base uppercase tracking-[0.18em] text-dwell-muted">How it works</p>
+          <h2 className="mt-3 font-heading text-4xl font-bold md:text-5xl">Three simple steps</h2>
         </FadeIn>
-        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature, i) => (
-            <FadeIn key={feature.title} delay={i * 0.05}>
-              <div className="h-full rounded-[16px] border border-dwell-sand bg-white p-6 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
-                <feature.icon className="h-6 w-6 text-dwell-deep" />
-                <h3 className="mt-4 font-heading text-lg font-semibold">{feature.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-dwell-muted">{feature.copy}</p>
+        <div className="mt-16 grid gap-8 md:grid-cols-3">
+          {steps.map((step, i) => (
+            <FadeIn key={step.n} delay={i * 0.05}>
+              <div className="h-full rounded-[24px] border border-dwell-sand bg-white p-8 md:p-10">
+                <p className="font-heading text-lg text-dwell-green">{step.n}</p>
+                <h3 className="mt-4 font-heading text-2xl font-semibold">{step.title}</h3>
+                <p className="mt-3 text-base leading-relaxed text-dwell-muted">{step.copy}</p>
               </div>
             </FadeIn>
           ))}
         </div>
       </section>
 
-      <section id="templates" className="bg-white/40 py-24">
-        <div className="mx-auto max-w-6xl px-5">
+      <section id="product" className="bg-white py-28">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <FadeIn>
-            <p className="text-sm uppercase tracking-[0.18em] text-dwell-muted">Templates</p>
-            <h2 className="mt-2 font-heading text-3xl font-bold">A look that fits the house</h2>
+            <p className="text-base uppercase tracking-[0.18em] text-dwell-muted">What you get</p>
+            <h2 className="mt-3 max-w-3xl font-heading text-4xl font-bold md:text-5xl">
+              Built around your property, not a booking website
+            </h2>
           </FadeIn>
-          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {TEMPLATE_META.map((tpl) => (
-              <div key={tpl.id} className="overflow-hidden rounded-[16px] border border-dwell-sand bg-white">
-                <img src={tpl.preview} alt="" className="h-44 w-full object-cover" />
-                <div className="p-5">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-heading font-semibold">{tpl.name}</h3>
-                    {tpl.tier === "free" ? (
-                      <Badge>Included</Badge>
-                    ) : (
-                      <Button asChild size="sm">
-                        <Link to="/upgrade">Upgrade</Link>
-                      </Button>
-                    )}
-                  </div>
-                  <p className="mt-2 text-sm text-dwell-muted">{tpl.description}</p>
+          <div className="mt-16 grid gap-6 md:grid-cols-6">
+            {[
+              {
+                icon: LayoutTemplate,
+                title: "A public property page",
+                copy: "Photos, what the property has, stay rules, and a form to ask about staying.",
+                span: "md:col-span-3",
+              },
+              {
+                icon: ShieldCheck,
+                title: "A private host area",
+                copy: "See occupancy, edit your page, read messages, and keep the books.",
+                span: "md:col-span-3",
+              },
+              {
+                icon: CalendarDays,
+                title: "Stay calendar",
+                copy: "Mark who is coming and for how many nights.",
+                span: "md:col-span-2",
+              },
+              {
+                icon: Wallet,
+                title: "Money notebook",
+                copy: "Income and expenses, written by you. No card machines.",
+                span: "md:col-span-2",
+              },
+              {
+                icon: QrCode,
+                title: "Arrival guide",
+                copy: "Wifi, the door, check-in time, and stay rules — behind a QR code.",
+                span: "md:col-span-2",
+              },
+            ].map((item, i) => (
+              <FadeIn key={item.title} delay={i * 0.04} className={item.span}>
+                <div className="h-full rounded-[24px] border border-dwell-sand bg-[#FAF8F3] p-8 md:p-10">
+                  <item.icon className="h-8 w-8 text-dwell-deep" />
+                  <h3 className="mt-6 font-heading text-2xl font-semibold">{item.title}</h3>
+                  <p className="mt-3 text-base leading-relaxed text-dwell-muted">{item.copy}</p>
                 </div>
-              </div>
+              </FadeIn>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="demo" className="px-5 py-16">
-        <div className="mx-auto max-w-6xl overflow-hidden rounded-[16px] bg-dwell-deep px-8 py-14 text-white md:px-14">
-          <p className="text-sm uppercase tracking-[0.18em] text-dwell-sage">Demo</p>
-          <h2 className="mt-2 font-heading text-3xl font-bold">Walk through a property without signing up</h2>
-          <p className="mt-3 max-w-xl text-white/80">
-            Read-only sample pages — the public showcase, the host dashboard, and a guest guide. Nothing you click
-            will save.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button asChild variant="secondary">
-              <Link to="/demo/property">Demo frontend</Link>
-            </Button>
-            <Button asChild className="bg-white text-dwell-deep hover:bg-dwell-beige">
-              <Link to="/demo/admin">Demo backend</Link>
-            </Button>
-            <Button asChild variant="ghost" className="text-white hover:bg-white/10">
-              <Link to="/demo">Demo overview</Link>
-            </Button>
-          </div>
+      <section id="templates" className="mx-auto max-w-7xl px-6 py-28 lg:px-8">
+        <FadeIn>
+          <p className="text-base uppercase tracking-[0.18em] text-dwell-muted">Looks</p>
+          <h2 className="mt-3 font-heading text-4xl font-bold md:text-5xl">A look that fits the property</h2>
+        </FadeIn>
+        <div className="mt-16 grid gap-8 sm:grid-cols-3">
+          {TEMPLATE_META.filter((tpl) => tpl.tier === "free").map((tpl) => (
+            <div key={tpl.id} className="overflow-hidden rounded-[24px] border border-dwell-sand bg-white">
+              <img src={tpl.preview} alt="" className="h-56 w-full bg-dwell-sand object-cover" />
+              <div className="p-8">
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="font-heading text-2xl font-semibold">{tpl.name}</h3>
+                  <Badge>Included</Badge>
+                </div>
+                <p className="mt-3 text-base text-dwell-muted">{tpl.description}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
-      <section id="signup" className="mx-auto max-w-xl px-5 py-24">
-        <FadeIn>
-          <p className="text-sm uppercase tracking-[0.18em] text-dwell-muted">Get started</p>
-          <h2 className="mt-2 font-heading text-3xl font-bold">Create your property</h2>
-          <p className="mt-3 text-dwell-muted">
-            Email, Google, or Facebook. After verification, we seed a starter page. New accounts wait for a short
-            manual approval.
+      <section className="px-6 pb-8 lg:px-8">
+        <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-8 rounded-[28px] bg-dwell-deep px-10 py-16 text-white md:flex-row md:items-center md:px-14">
+          <div>
+            <p className="text-base uppercase tracking-[0.18em] text-dwell-sage">Have a look first</p>
+            <h2 className="mt-3 font-heading text-4xl font-bold md:text-5xl">Try a sample property</h2>
+            <p className="mt-4 max-w-xl text-lg text-white/75">
+              Open the guest page, the host area, and the arrival guide. Nothing is saved.
+            </p>
+          </div>
+          <Button asChild size="xl" className="bg-white text-dwell-deep hover:bg-dwell-beige">
+            <Link to="/demo">Open the demo</Link>
+          </Button>
+        </div>
+      </section>
+
+      <section id="signup" className="mx-auto grid max-w-7xl gap-16 px-6 py-28 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
+        <div>
+          <p className="text-base uppercase tracking-[0.18em] text-dwell-muted">Get started</p>
+          <h2 className="mt-3 font-heading text-4xl font-bold md:text-5xl">Create your workspace</h2>
+          <p className="mt-5 max-w-xl text-lg leading-relaxed text-dwell-muted">
+            Use email, Google, or Facebook. After you confirm your email, we start a page for your property. New
+            accounts wait for a short check from our team so the site stays calm and genuine.
           </p>
-          <form onSubmit={handleSignup} className="mt-8 space-y-4 rounded-[16px] border border-dwell-sand bg-white p-6">
-            <div>
-              <Label htmlFor="propertyName">Property name</Label>
-              <Input id="propertyName" value={propertyName} onChange={(e) => setPropertyName(e.target.value)} required />
-            </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
+          <ul className="mt-10 space-y-4 text-base text-dwell-muted">
+            {workspacePoints.map((item) => (
+              <li key={item.text} className="flex gap-3">
+                <item.icon className="mt-0.5 h-5 w-5 shrink-0 text-dwell-deep" />
+                <span>{item.text}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <form
+          onSubmit={handleSignup}
+          className="space-y-5 rounded-[24px] border border-dwell-sand bg-white p-8 shadow-sm md:p-10"
+        >
+          <div>
+            <Label htmlFor="propertyName">Property name</Label>
+            <Input
+              id="propertyName"
+              value={propertyName}
+              placeholder="Sunset Beach Villa"
+              onChange={(e) => {
+                const next = e.target.value;
+                setPropertyName(next);
+                if (!slugEdited) setSlug(slugifyLive(next));
+              }}
+              required
+            />
+          </div>
+          <div>
+            <Label htmlFor="webAddress">Web address</Label>
+            <div className="relative">
+              <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-dwell-muted" />
               <Input
-                id="password"
-                type="password"
-                minLength={8}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                id="webAddress"
+                className="pl-9"
+                value={slug}
+                placeholder="sunset-beach-villa"
+                onChange={(e) => {
+                  setSlugEdited(true);
+                  setSlug(slugifyLive(e.target.value));
+                }}
                 required
               />
             </div>
-            {error ? <p className="text-sm text-red-700">{error}</p> : null}
-            <Button type="submit" className="w-full" disabled={busy}>
-              {busy ? "Creating…" : "Create property"}
+            <p className="mt-2 text-sm text-dwell-muted">
+              Your page will live at{" "}
+              <span className="font-medium text-dwell-charcoal">
+                {host}/{previewSlug}
+              </span>
+            </p>
+          </div>
+          <div>
+            <Label htmlFor="email">Email</Label>
+            <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </div>
+          <div>
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              minLength={8}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          {error ? <p className="text-sm text-red-700">{error}</p> : null}
+          <Button type="submit" className="w-full" size="xl" disabled={busy}>
+            {busy ? "Creating…" : "Create my property page"}
+          </Button>
+          <div className="grid grid-cols-2 gap-3">
+            <Button type="button" variant="outline" size="lg" onClick={() => void oauth("google")}>
+              Google
             </Button>
-            <div className="grid grid-cols-2 gap-3">
-              <Button type="button" variant="outline" onClick={() => void oauth("google")}>
-                Google
-              </Button>
-              <Button type="button" variant="outline" onClick={() => void oauth("facebook")}>
-                Facebook
-              </Button>
-            </div>
-          </form>
-        </FadeIn>
+            <Button type="button" variant="outline" size="lg" onClick={() => void oauth("facebook")}>
+              Facebook
+            </Button>
+          </div>
+        </form>
       </section>
 
-      <footer className="border-t border-dwell-sand bg-white/60">
-        <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-10 md:flex-row md:items-center md:justify-between">
-          <DwellocalLogo showTagline />
-          <div className="flex gap-6 text-sm text-dwell-muted">
-            <Link to="/terms">Terms</Link>
-            <Link to="/privacy">Privacy</Link>
-          </div>
-          <p className="text-sm text-dwell-muted">© {new Date().getFullYear()} Dwellocal</p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

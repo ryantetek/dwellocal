@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Navigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,7 +38,9 @@ export function SupportPage() {
   return (
     <div className="max-w-xl">
       <h1 className="font-heading text-2xl font-bold">Support</h1>
-      <p className="text-sm text-slate-500">Contact Super Admin or request an upgrade.</p>
+      <p className="text-sm text-slate-500">
+        {isDemo ? "Message Super Admin. Upgrade options appear after you create an account." : "Contact Super Admin or request an upgrade."}
+      </p>
       <form onSubmit={send} className="mt-6 space-y-3 rounded-[16px] border border-slate-200 bg-white p-6">
         <div>
           <Label>Category</Label>
@@ -47,8 +50,8 @@ export function SupportPage() {
             onChange={(e) => setCategory(e.target.value)}
           >
             <option value="general">General</option>
-            <option value="upgrade">Upgrade request</option>
-            <option value="billing">Plan / billing</option>
+            {isDemo ? null : <option value="upgrade">Upgrade request</option>}
+            {isDemo ? null : <option value="billing">Plan / billing</option>}
             <option value="bug">Something broken</option>
           </select>
         </div>
@@ -68,6 +71,7 @@ export function SupportPage() {
 
 export function UpgradePage() {
   const { isDemo } = useDemo();
+  if (isDemo) return <Navigate to="/demo/admin" replace />;
   return (
     <div className="max-w-2xl">
       <h1 className="font-heading text-2xl font-bold">Upgrade to Pro</h1>
@@ -81,7 +85,7 @@ export function UpgradePage() {
         <li>Hide “Powered by Dwellocal”</li>
       </ul>
       <Button asChild variant="slate" className="mt-6">
-        <a href={isDemo ? "/demo/admin/support" : "/admin/support"}>Request upgrade</a>
+        <a href="/admin/support">Request upgrade</a>
       </Button>
     </div>
   );

@@ -16,6 +16,8 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useDemo } from "@/contexts/DemoContext";
 import { useProperties } from "@/contexts/PropertyContext";
+import { DemoRibbon } from "@/components/DemoRibbon";
+import { DwellocalLogo } from "@/components/DwellocalLogo";
 import { cn } from "@/lib/utils";
 
 const nav = [
@@ -39,13 +41,15 @@ export function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const base = isDemo ? "/demo/admin" : "/admin";
+  const items = nav.filter((item) => !(isDemo && item.to === "upgrade"));
 
   return (
     <div className="admin-scope flex min-h-screen">
+      {isDemo ? <DemoRibbon /> : null}
       <aside className="hidden w-64 shrink-0 border-r border-slate-200 bg-white md:flex md:flex-col">
         <div className="px-5 py-5">
           <p className="text-xs uppercase tracking-[0.16em] text-slate-400">Host portal</p>
-          <p className="mt-1 font-heading text-lg font-bold text-slate-900">Dwellocal</p>
+          <DwellocalLogo className="mt-2" markClassName="h-8 w-8" />
         </div>
         {isDemo ? (
           <div className="mx-4 mb-3 rounded-[12px] bg-amber-50 px-3 py-2 text-xs text-amber-800">
@@ -70,7 +74,7 @@ export function AdminLayout() {
           </Link>
         ) : null}
         <nav className="flex-1 space-y-0.5 px-3">
-          {nav.map((item) => (
+          {items.map((item) => (
             <NavLink
               key={item.to}
               to={item.to ? `${base}/${item.to}` : base}
@@ -119,7 +123,7 @@ export function AdminLayout() {
             value={location.pathname}
             onChange={(e) => navigate(e.target.value)}
           >
-            {nav.map((item) => {
+            {items.map((item) => {
               const href = item.to ? `${base}/${item.to}` : base;
               return (
                 <option key={href} value={href}>

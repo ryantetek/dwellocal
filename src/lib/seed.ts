@@ -1,14 +1,18 @@
-import { randomToken, slugify } from "@/lib/utils";
+import { randomToken, RESERVED_SLUGS, slugify } from "@/lib/utils";
 import type { TemplateId } from "@/lib/templates";
 import { requireSupabase } from "@/lib/supabase";
 
 export async function createPropertyWithSeed(input: {
   userId: string;
   name: string;
+  slug?: string;
   template?: TemplateId;
 }) {
   const supabase = requireSupabase();
-  const baseSlug = slugify(input.name) || "property";
+  const baseSlug = slugify(input.slug || input.name) || "property";
+  if (RESERVED_SLUGS.has(baseSlug)) {
+    throw new Error("That web address is reserved. Please choose another.");
+  }
   let slug = baseSlug;
   for (let i = 0; i < 8; i += 1) {
     const { data: existing } = await supabase.from("properties").select("id").eq("slug", slug).maybeSingle();
@@ -60,9 +64,21 @@ export async function createPropertyWithSeed(input: {
 
   const rules = [
     { title: "Quiet hours", description: "Please keep noise low after 10pm.", icon: "quiet", sort_order: 0 },
-    { title: "Respect the house", description: "Treat it as you would a friend's home.", icon: "home", sort_order: 1 },
+    { title: "Respect the property", description: "Treat it as you would a friend's home.", icon: "home", sort_order: 1 },
+    { title: "Shoes at the door", description: "Help us keep the floors in good condition.", icon: "shoes", sort_order: 2 },
+    { title: "No smoking indoors", description: "Please smoke outside only.", icon: "ban", sort_order: 3 },
+    { title: "Check-out on time", description: "Leave by the posted check-out unless arranged.", icon: "clock", sort_order: 4 },
+    { title: "Sort recycling", description: "Use the labeled bins in the kitchen.", icon: "recycle", sort_order: 5 },
   ].map((row) => ({ ...row, property_id: property.id, active: true }));
   await supabase.from("house_rules").insert(rules);
+
+  await supabase.from("social_links").insert(
+    [
+      { platform: "Instagram", url: "", icon: "instagram", sort_order: 0 },
+      { platform: "Facebook", url: "", icon: "facebook", sort_order: 1 },
+      { platform: "TikTok", url: "", icon: "tiktok", sort_order: 2 },
+    ].map((row) => ({ ...row, property_id: property.id })),
+  );
 
   return property;
 }

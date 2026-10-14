@@ -2,9 +2,11 @@ import { Clock, MapPin } from "lucide-react";
 import { DwellocalLogo } from "@/components/DwellocalLogo";
 import { FadeIn } from "@/components/FadeIn";
 import { GalleryLightbox } from "@/components/property/GalleryLightbox";
+import { EnquiryForm } from "@/components/property/EnquiryForm";
 import { InquiryWidget } from "@/components/property/InquiryWidget";
 import { TrackingScripts } from "@/components/property/TrackingScripts";
 import { getIcon } from "@/lib/icons";
+import { getSocialIcon } from "@/lib/socialIcons";
 import type { TemplateId } from "@/lib/templates";
 import { cn } from "@/lib/utils";
 import type { PropertyBundle } from "@/types/database";
@@ -122,15 +124,26 @@ export function TemplateRenderer({
                 </p>
               </div>
             </div>
-            <div className="flex flex-wrap gap-3 text-sm">
-              {social.map((link) => (
-                <a key={link.id} href={link.url} className="underline underline-offset-4" target="_blank" rel="noreferrer">
-                  {link.platform}
-                </a>
-              ))}
+            <div className="flex flex-wrap items-center gap-2 md:justify-end">
+              {social.filter((link) => link.url).map((link) => {
+                const Icon = getSocialIcon(link.platform, link.icon);
+                return (
+                  <a
+                    key={link.id}
+                    href={link.url}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-current/15 transition-transform hover:-translate-y-0.5"
+                    target="_blank"
+                    rel="noreferrer"
+                    aria-label={link.platform}
+                    title={link.platform}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </a>
+                );
+              })}
             </div>
           </div>
-          <p className="mt-10 max-w-3xl text-lg leading-relaxed opacity-90">{settings.about_text}</p>
+          <p className="mt-10 w-full max-w-none text-lg leading-relaxed opacity-90">{settings.about_text}</p>
         </FadeIn>
       </section>
 
@@ -165,8 +178,8 @@ export function TemplateRenderer({
 
       <section className={v.section}>
         <FadeIn>
-          <h2 className="font-heading text-3xl font-bold">House rules</h2>
-          <div className="mt-8 space-y-4">
+          <h2 className="font-heading text-3xl font-bold">Stay rules</h2>
+          <div className="mt-8 grid gap-5 sm:grid-cols-2">
             {rules
               .filter((r) => r.active)
               .map((rule) => {
@@ -181,6 +194,29 @@ export function TemplateRenderer({
                   </div>
                 );
               })}
+          </div>
+        </FadeIn>
+      </section>
+
+      <section className={v.section}>
+        <FadeIn>
+          <div
+            className={cn(
+              "mx-auto max-w-2xl rounded-[16px] border border-current/10 p-6 text-center md:p-10",
+              dark ? "bg-white/5" : "bg-white/70",
+            )}
+          >
+            <h2 className="font-heading text-3xl font-bold">Enquire</h2>
+            <p className="mx-auto mt-2 max-w-md text-sm opacity-75">
+              Ask about dates, the property, or anything you need before you stay.
+            </p>
+            <EnquiryForm
+              propertyId={property.id}
+              readOnly={readOnly}
+              idPrefix="page-enq"
+              wide
+              className="mt-6 text-left"
+            />
           </div>
         </FadeIn>
       </section>
