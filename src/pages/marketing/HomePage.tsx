@@ -9,7 +9,6 @@ import {
   LayoutTemplate,
   Link2,
   Mail,
-  MessageCircle,
   QrCode,
   ShieldCheck,
   Wallet,
