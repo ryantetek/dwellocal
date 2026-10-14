@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@theme {
+  --font-heading: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  --color-dwell-green: #6f8f78;
+  --color-dwell-deep: #30483b;
+  --color-dwell-charcoal: #171a19;
+  --color-dwell-beige: #f5f1e8;
+  --color-dwell-sage: #d9e4d8;
+  --color-dwell-sand: #e8e0d2;
+  --color-dwell-ink: #171a19;
+  --color-dwell-muted: #5c645f;
+
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--color-dwell-beige);
+  color: var(--color-dwell-charcoal);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-heading {
+  font-family: var(--font-heading);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.admin-scope {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --card: #ffffff;
+  --primary: #334155;
+  --primary-foreground: #f8fafc;
+  min-height: 100vh;
+  background: #f1f5f9;
+  color: #0f172a;
+  font-family: var(--font-sans);
+}
+
+.admin-scope h1,
+.admin-scope h2,
+.admin-scope h3,
+.admin-scope h4 {
+  font-family: var(--font-heading);
+  color: #0f172a;
+}
