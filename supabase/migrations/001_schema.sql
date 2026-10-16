@@ -36,6 +36,8 @@ create table if not exists public.site_settings (
   hero_subtitle text not null default '',
   hero_image_url text not null default '',
   location_summary text not null default '',
+  contact_email text not null default '',
+  contact_phone text not null default '',
   check_in_time text not null default '16:00',
   check_out_time text not null default '10:00',
   about_text text not null default '',

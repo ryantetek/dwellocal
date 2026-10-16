@@ -16,10 +16,13 @@ import {
 import { FadeIn } from "@/components/FadeIn";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { BRAND_TAGLINE } from "@/lib/brand";
+import { stashPendingProperty } from "@/lib/oauth";
 import { TEMPLATE_META } from "@/lib/templates";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { RESERVED_SLUGS, slugify, slugifyLive } from "@/lib/utils";
@@ -103,16 +106,20 @@ export function HomePage() {
     }
   }
 
-  async function oauth(provider: "google" | "facebook") {
-    if (!supabase) {
-      setError("Connect Supabase to use social login.");
-      return;
+  function prepareSocialSignup() {
+    if (!isSupabaseConfigured) {
+      setError("Connect Supabase to use Google or Facebook sign-in.");
+      return false;
     }
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: `${window.location.origin}/after-login` },
-    });
-    if (oauthError) setError(oauthError.message);
+    const webAddress = slugify(slug);
+    if (propertyName.trim()) {
+      if (webAddress && RESERVED_SLUGS.has(webAddress)) {
+        setError("That web address is reserved. Please choose another.");
+        return false;
+      }
+      stashPendingProperty(propertyName.trim(), webAddress || undefined);
+    }
+    return true;
   }
 
   return (
@@ -124,7 +131,7 @@ export function HomePage() {
         <div className="pointer-events-none absolute -left-16 bottom-0 h-72 w-72 rounded-full bg-dwell-sand/80 blur-3xl" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-[1.1fr_0.9fr]">
           <FadeIn>
-            <Badge className="px-4 py-1.5 text-sm">Property Management, Simplified.</Badge>
+            <Badge className="px-4 py-1.5 text-sm">{BRAND_TAGLINE}</Badge>
             <h1 className="mt-7 font-heading text-5xl font-bold leading-[1.05] tracking-tight md:text-7xl">
               Your space, online —
               <span className="block text-dwell-deep">without the fuss.</span>
@@ -372,14 +379,8 @@ export function HomePage() {
           <Button type="submit" className="w-full" size="xl" disabled={busy}>
             {busy ? "Creating…" : "Create my property page"}
           </Button>
-          <div className="grid grid-cols-2 gap-3">
-            <Button type="button" variant="outline" size="lg" onClick={() => void oauth("google")}>
-              Google
-            </Button>
-            <Button type="button" variant="outline" size="lg" onClick={() => void oauth("facebook")}>
-              Facebook
-            </Button>
-          </div>
+          <p className="text-center text-xs uppercase tracking-[0.14em] text-dwell-muted">or</p>
+          <SocialAuthButtons size="lg" onError={setError} beforeSignIn={prepareSocialSignup} />
         </form>
       </section>
 

@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { DwellocalLogo } from "@/components/DwellocalLogo";
+import { SocialAuthButtons } from "@/components/SocialAuthButtons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
+import { clearPendingProperty, readPendingProperty } from "@/lib/oauth";
 import { createPropertyWithSeed } from "@/lib/seed";
 import { supabase } from "@/lib/supabase";
 
@@ -49,15 +51,6 @@ export function LoginPage() {
     navigate(from || "/after-login");
   }
 
-  async function oauth(provider: "google" | "facebook") {
-    if (!supabase) return setError("Supabase is not configured.");
-    const { error: oauthError } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: { redirectTo: `${window.location.origin}/after-login` },
-    });
-    if (oauthError) setError(oauthError.message);
-  }
-
   return (
     <AuthShell title="Log in">
       <form onSubmit={submit} className="space-y-4">
@@ -74,14 +67,8 @@ export function LoginPage() {
           {busy ? "Signing in…" : "Log in"}
         </Button>
       </form>
-      <div className="mt-4 grid grid-cols-2 gap-3">
-        <Button variant="outline" onClick={() => void oauth("google")}>
-          Google
-        </Button>
-        <Button variant="outline" onClick={() => void oauth("facebook")}>
-          Facebook
-        </Button>
-      </div>
+      <p className="my-4 text-center text-xs uppercase tracking-[0.14em] text-dwell-muted">or</p>
+      <SocialAuthButtons onError={setError} />
       <p className="mt-4 text-sm text-dwell-muted">
         <Link to="/forgot-password" className="underline">
           Forgot password
@@ -246,14 +233,28 @@ export function AfterLoginPage() {
       setChecked(true);
       return;
     }
-    void supabase
-      .from("properties")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .then(({ count }) => {
-        setHasProperty(Boolean(count));
-        setChecked(true);
-      });
+    void (async () => {
+      const { count } = await supabase
+        .from("properties")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", user.id);
+      if (!count) {
+        const pending = readPendingProperty();
+        if (pending?.name) {
+          try {
+            await createPropertyWithSeed({ userId: user.id, name: pending.name, slug: pending.slug });
+            clearPendingProperty();
+            setHasProperty(true);
+            setChecked(true);
+            return;
+          } catch {
+            /* onboarding can finish the rest */
+          }
+        }
+      }
+      setHasProperty(Boolean(count));
+      setChecked(true);
+    })();
   }, [isSuperAdmin, profile?.status, ready, user]);
 
   if (!ready) return <AuthShell title="Signing you in">Loading…</AuthShell>;

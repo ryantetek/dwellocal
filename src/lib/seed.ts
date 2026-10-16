@@ -42,6 +42,8 @@ export async function createPropertyWithSeed(input: {
     hero_subtitle: "A considered stay, presented simply.",
     hero_image_url: hero,
     location_summary: "Add your location",
+    contact_email: "",
+    contact_phone: "",
     check_in_time: "16:00",
     check_out_time: "10:00",
     about_text: "Tell guests what makes this place feel like home.",

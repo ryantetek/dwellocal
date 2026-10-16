@@ -1,4 +1,4 @@
-import { Clock, KeyRound, Wifi } from "lucide-react";
+import { Clock, KeyRound, Mail, Phone, Wifi } from "lucide-react";
 import { DemoRibbon } from "@/components/DemoRibbon";
 import { getIcon } from "@/lib/icons";
 import type { HouseRule, SiteSetting } from "@/types/database";
@@ -35,6 +35,30 @@ export function GuestGuideView({
               In {settings.check_in_time || "—"} · Out {settings.check_out_time || "—"}
             </p>
           </div>
+          {settings.contact_email || settings.contact_phone ? (
+            <div className="rounded-[12px] bg-dwell-beige p-4">
+              <p className="font-heading font-semibold">Host contact</p>
+              {settings.contact_email ? (
+                <p className="mt-2 flex items-center gap-2 text-sm">
+                  <Mail className="h-4 w-4 shrink-0" />
+                  <a className="underline-offset-4 hover:underline" href={`mailto:${settings.contact_email}`}>
+                    {settings.contact_email}
+                  </a>
+                </p>
+              ) : null}
+              {settings.contact_phone ? (
+                <p className="mt-2 flex items-center gap-2 text-sm">
+                  <Phone className="h-4 w-4 shrink-0" />
+                  <a
+                    className="underline-offset-4 hover:underline"
+                    href={`tel:${settings.contact_phone.replace(/[^\d+]/g, "")}`}
+                  >
+                    {settings.contact_phone}
+                  </a>
+                </p>
+              ) : null}
+            </div>
+          ) : null}
           <div className="rounded-[12px] bg-dwell-beige p-4">
             <div className="flex items-center gap-2 font-heading font-semibold">
               <Wifi className="h-4 w-4" /> Wifi

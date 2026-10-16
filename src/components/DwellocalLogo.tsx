@@ -104,7 +104,7 @@ export function DwellocalLogo({
               className="text-[11px] tracking-[0.14em] uppercase"
               style={{ color: inverted ? "#d9e4d8" : "#5c645f" }}
             >
-              Manage. Showcase. Grow.
+              Property Management, Simplified.
             </div>
           ) : null}
         </div>

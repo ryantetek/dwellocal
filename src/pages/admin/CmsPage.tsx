@@ -73,6 +73,8 @@ export function CmsPage() {
               ["hero_subtitle", "Hero subtitle"],
               ["hero_image_url", "Hero image URL"],
               ["location_summary", "Location"],
+              ["contact_email", "Email"],
+              ["contact_phone", "Phone number"],
               ["check_in_time", "Check-in"],
               ["check_out_time", "Check-out"],
             ] as const
@@ -81,6 +83,7 @@ export function CmsPage() {
               <Label>{label}</Label>
               <Input
                 className="border-slate-200"
+                type={key === "contact_email" ? "email" : key === "contact_phone" ? "tel" : "text"}
                 value={String(settings[key] ?? "")}
                 onChange={(e) => setSettings((s) => ({ ...s, [key]: e.target.value }))}
               />

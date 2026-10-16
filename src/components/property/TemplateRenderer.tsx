@@ -1,4 +1,4 @@
-import { Clock, MapPin } from "lucide-react";
+import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { DwellocalLogo } from "@/components/DwellocalLogo";
 import { FadeIn } from "@/components/FadeIn";
 import { GalleryLightbox } from "@/components/property/GalleryLightbox";
@@ -107,16 +107,16 @@ export function TemplateRenderer({
 
       <section className={v.section}>
         <FadeIn>
-          <div className="grid gap-8 md:grid-cols-3">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div className="flex gap-3">
-              <MapPin className={cn("h-5 w-5", v.accent)} />
+              <MapPin className={cn("h-5 w-5 shrink-0", v.accent)} />
               <div>
                 <p className="text-sm uppercase tracking-wider opacity-70">Location</p>
                 <p>{settings.location_summary}</p>
               </div>
             </div>
             <div className="flex gap-3">
-              <Clock className={cn("h-5 w-5", v.accent)} />
+              <Clock className={cn("h-5 w-5 shrink-0", v.accent)} />
               <div>
                 <p className="text-sm uppercase tracking-wider opacity-70">Check-in / out</p>
                 <p>
@@ -124,7 +124,34 @@ export function TemplateRenderer({
                 </p>
               </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2 md:justify-end">
+            {settings.contact_email ? (
+              <div className="flex gap-3">
+                <Mail className={cn("h-5 w-5 shrink-0", v.accent)} />
+                <div>
+                  <p className="text-sm uppercase tracking-wider opacity-70">Email</p>
+                  <a className="underline-offset-4 hover:underline" href={`mailto:${settings.contact_email}`}>
+                    {settings.contact_email}
+                  </a>
+                </div>
+              </div>
+            ) : null}
+            {settings.contact_phone ? (
+              <div className="flex gap-3">
+                <Phone className={cn("h-5 w-5 shrink-0", v.accent)} />
+                <div>
+                  <p className="text-sm uppercase tracking-wider opacity-70">Phone</p>
+                  <a
+                    className="underline-offset-4 hover:underline"
+                    href={`tel:${settings.contact_phone.replace(/[^\d+]/g, "")}`}
+                  >
+                    {settings.contact_phone}
+                  </a>
+                </div>
+              </div>
+            ) : null}
+          </div>
+          {social.some((link) => link.url) ? (
+            <div className="mt-8 flex flex-wrap items-center gap-2">
               {social.filter((link) => link.url).map((link) => {
                 const Icon = getSocialIcon(link.platform, link.icon);
                 return (
@@ -142,7 +169,7 @@ export function TemplateRenderer({
                 );
               })}
             </div>
-          </div>
+          ) : null}
           <p className="mt-10 w-full max-w-none text-lg leading-relaxed opacity-90">{settings.about_text}</p>
         </FadeIn>
       </section>

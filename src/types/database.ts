@@ -39,6 +39,8 @@ export type SiteSetting = {
   hero_subtitle: string;
   hero_image_url: string;
   location_summary: string;
+  contact_email: string;
+  contact_phone: string;
   check_in_time: string;
   check_out_time: string;
   about_text: string;

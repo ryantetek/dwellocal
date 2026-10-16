@@ -29,6 +29,8 @@ const settings: SiteSetting = {
   hero_image_url:
     "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=2000&q=80",
   location_summary: "Harborview, Maine · 4 minutes to the village quay",
+  contact_email: "stay@cedarsalt.example",
+  contact_phone: "+1 (207) 555-0140",
   check_in_time: "16:00",
   check_out_time: "10:00",
   about_text:
