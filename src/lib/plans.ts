@@ -45,7 +45,7 @@ export function resolvePlan(input: {
     plan,
     propertyLimit: input.property_limit ?? limits.propertyLimit,
     galleryLimit: limits.galleryLimit,
-    hideBranding: plan === "pro" && (input.hide_branding ?? true),
+    hideBranding: limits.hideBranding,
     customScripts: limits.customScripts,
     allTemplates: limits.allTemplates,
     expiresAt,

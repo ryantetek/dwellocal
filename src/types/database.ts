@@ -157,6 +157,8 @@ export type AdminMessage = {
   body: string;
   from_super_admin: boolean;
   is_read: boolean;
+  resolved: boolean;
+  thread_id: string | null;
   created_at: string;
 };
 

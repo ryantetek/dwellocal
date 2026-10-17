@@ -58,20 +58,26 @@ export function SettingsPage() {
         <Textarea className="border-slate-200" value={settings.custom_header_code ?? ""} onChange={(e) => setSettings((s) => ({ ...s, custom_header_code: e.target.value }))} disabled={!plan.customScripts} />
         <Label className="mt-4">Custom footer code</Label>
         <Textarea className="border-slate-200" value={settings.custom_footer_code ?? ""} onChange={(e) => setSettings((s) => ({ ...s, custom_footer_code: e.target.value }))} disabled={!plan.customScripts} />
-        <label className="mt-4 flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            disabled={!plan.hideBranding}
-            checked={Boolean(settings.hide_branding)}
-            onChange={(e) => setSettings((s) => ({ ...s, hide_branding: e.target.checked }))}
-          />
-          Hide “Powered by Dwellocal”
-        </label>
-        {!isDemo && !plan.hideBranding ? (
-          <Button asChild variant="slate" size="sm" className="mt-3">
-            <Link to="/admin/upgrade">Upgrade to hide branding</Link>
-          </Button>
-        ) : null}
+        <div className="mt-6 rounded-[12px] border border-slate-200 bg-slate-50 p-4">
+          <p className="text-sm font-medium text-slate-800">Branding</p>
+          <label className="mt-3 flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              disabled={!plan.hideBranding}
+              checked={Boolean(settings.hide_branding)}
+              onChange={(e) => setSettings((s) => ({ ...s, hide_branding: e.target.checked }))}
+            />
+            Hide “Powered by Dwellocal” on the public property page
+          </label>
+          {!plan.hideBranding ? (
+            <p className="mt-2 text-xs text-slate-500">Available on Pro.</p>
+          ) : null}
+          {!isDemo && !plan.hideBranding ? (
+            <Button asChild variant="slate" size="sm" className="mt-3">
+              <Link to="/admin/upgrade">Upgrade to hide branding</Link>
+            </Button>
+          ) : null}
+        </div>
         <Button variant="slate" className="mt-6" onClick={() => void save()}>
           Save settings
         </Button>

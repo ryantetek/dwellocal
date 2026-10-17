@@ -154,6 +154,8 @@ create table if not exists public.admin_messages (
   body text not null,
   from_super_admin boolean not null default false,
   is_read boolean not null default false,
+  resolved boolean not null default false,
+  thread_id uuid,
   created_at timestamptz not null default now()
 );
 

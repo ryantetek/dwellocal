@@ -1,5 +1,6 @@
 import type {
   Amenity,
+  AdminMessage,
   ChatMessage,
   ExpenseEntry,
   GalleryMedia,
@@ -395,3 +396,45 @@ export const demoBundle: PropertyBundle = {
 };
 
 export const demoHostName = "Alex Rivera";
+
+export const demoSupportMessages: AdminMessage[] = [
+  {
+    id: "demo-support-1",
+    user_id: "demo-host",
+    parent_id: null,
+    thread_id: "demo-thread-qr",
+    category: "general",
+    subject: "Guest guide QR",
+    body: "Can Super Admin confirm the welcome-sheet QR still works after we change the property name?",
+    from_super_admin: false,
+    is_read: true,
+    resolved: true,
+    created_at: "2026-10-08T14:12:00.000Z",
+  },
+  {
+    id: "demo-support-2",
+    user_id: "demo-host",
+    parent_id: "demo-support-1",
+    thread_id: "demo-thread-qr",
+    category: "general",
+    subject: "Re: Guest guide QR",
+    body: "Yes — the QR points at the token, not the name. You’re all set. Marking this resolved.",
+    from_super_admin: true,
+    is_read: true,
+    resolved: true,
+    created_at: "2026-10-08T15:40:00.000Z",
+  },
+  {
+    id: "demo-support-3",
+    user_id: "demo-host",
+    parent_id: null,
+    thread_id: "demo-thread-wifi",
+    category: "general",
+    subject: "Wifi name on the guide",
+    body: "We renamed the network. Should I update the welcome sheet from CMS?",
+    from_super_admin: false,
+    is_read: true,
+    resolved: false,
+    created_at: "2026-10-12T09:05:00.000Z",
+  },
+];
