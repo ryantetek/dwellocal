@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BRAND_TAGLINE } from "@/lib/brand";
-import { stashPendingProperty } from "@/lib/oauth";
+import { SOCIAL_AUTH_ENABLED, stashPendingProperty } from "@/lib/oauth";
 import { TEMPLATE_META } from "@/lib/templates";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { RESERVED_SLUGS, slugify, slugifyLive } from "@/lib/utils";
@@ -49,7 +49,12 @@ const steps = [
 ];
 
 const workspacePoints = [
-  { icon: Mail, text: "Sign up with email, Google, or Facebook — whichever you already use" },
+  {
+    icon: Mail,
+    text: SOCIAL_AUTH_ENABLED
+      ? "Sign up with email, Google, or Facebook — whichever you already use"
+      : "Sign up with the email you already use (Google and Facebook logins soon!)",
+  },
   { icon: LayoutTemplate, text: "We start a page for your property. You add photos and words when you’re ready" },
   { icon: ShieldCheck, text: "A person on our team checks new accounts before they go live" },
   { icon: ImageIcon, text: "Change photos, stay rules, and check-in notes without a web designer" },
@@ -307,8 +312,9 @@ export function HomePage() {
           <p className="text-base uppercase tracking-[0.18em] text-dwell-muted">Get started</p>
           <h2 className="mt-3 font-heading text-4xl font-bold md:text-5xl">Create your workspace</h2>
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-dwell-muted">
-            Use email, Google, or Facebook. After you confirm your email, we start a page for your property. New
-            accounts wait for a short check from our team so the site stays calm and genuine.
+            {SOCIAL_AUTH_ENABLED
+              ? "Use email, Google, or Facebook. After you confirm your email, we start a page for your property. New accounts wait for a short check from our team so the site stays calm and genuine."
+              : "Use your email to get started. After you confirm it, we start a page for your property. New accounts wait for a short check from our team so the site stays calm and genuine."}
           </p>
           <ul className="mt-10 space-y-4 text-base text-dwell-muted">
             {workspacePoints.map((item) => (
@@ -379,8 +385,12 @@ export function HomePage() {
           <Button type="submit" className="w-full" size="xl" disabled={busy}>
             {busy ? "Creating…" : "Create my property page"}
           </Button>
-          <p className="text-center text-xs uppercase tracking-[0.14em] text-dwell-muted">or</p>
-          <SocialAuthButtons size="lg" onError={setError} beforeSignIn={prepareSocialSignup} />
+          {SOCIAL_AUTH_ENABLED ? (
+            <>
+              <p className="text-center text-xs uppercase tracking-[0.14em] text-dwell-muted">or</p>
+              <SocialAuthButtons size="lg" onError={setError} beforeSignIn={prepareSocialSignup} />
+            </>
+          ) : null}
         </form>
       </section>
 

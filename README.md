@@ -19,7 +19,7 @@ Without Supabase credentials the marketing site and `/demo` routes still work. A
 ## Supabase
 
 1. Create a project and paste URL + anon key into `.env`.
-2. In the SQL editor, run the **entire** `supabase/migrations/001_schema.sql` file. That creates `site_settings` (including email and phone). Run `002_contact_fields.sql` only if this project already had an older 001 without those columns. Run `003_support_resolved.sql` to add support thread resolution, then `004_support_threads.sql` so each inquiry can be its own conversation.
+2. In the SQL editor, run the **entire** `supabase/migrations/001_schema.sql` file. That creates `site_settings` (including email and phone). Run `002_contact_fields.sql` only if this project already had an older 001 without those columns. Run `003_support_resolved.sql` to add support thread resolution, then `004_support_threads.sql` so each inquiry can be its own conversation. Run `005_is_super_admin_rls.sql` so pending users can load their profile after login.
 3. Create a **public** Storage bucket named `gallery`.
 4. Enable Email OTP, Google, and Facebook in Authentication → Providers. Paste each provider’s Client ID and secret. In Google and Facebook consoles, the OAuth redirect URL must be `https://<project-ref>.supabase.co/auth/v1/callback`.
 5. In Authentication → URL Configuration, set **Site URL** to your app (`http://localhost:5173` locally, the Vercel URL in production). Add these **Redirect URLs**:

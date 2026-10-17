@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { signInWithSocial } from "@/lib/oauth";
+import { SOCIAL_AUTH_ENABLED, signInWithSocial } from "@/lib/oauth";
 
 function GoogleLogo({ className }: { className?: string }) {
   return (
@@ -44,6 +44,8 @@ export function SocialAuthButtons({
   beforeSignIn?: () => boolean | void;
   size?: "default" | "lg";
 }) {
+  if (!SOCIAL_AUTH_ENABLED) return null;
+
   async function oauth(provider: "google" | "facebook") {
     if (beforeSignIn && beforeSignIn() === false) return;
     const { error } = await signInWithSocial(provider);

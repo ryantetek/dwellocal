@@ -9,13 +9,16 @@ export function ProtectedRoute({
   children: ReactNode;
   superAdmin?: boolean;
 }) {
-  const { ready, user, profile, isSuperAdmin } = useAuth();
+  const { ready, extrasReady, user, profile, isSuperAdmin } = useAuth();
   const location = useLocation();
 
-  if (!ready) {
+  if (!ready || (user && !extrasReady && !isSuperAdmin && profile?.status !== "approved")) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-dwell-beige text-dwell-muted">
-        Loading…
+      <div className="flex min-h-screen flex-col items-center justify-center bg-dwell-beige px-5 text-center text-dwell-muted">
+        <p className="font-heading text-lg font-semibold text-dwell-charcoal">Verification still ongoing</p>
+        <p className="mt-2 max-w-md text-sm">
+          Super Admin has not enabled this account yet. Leave this page open and it will continue when you are approved.
+        </p>
       </div>
     );
   }
@@ -34,11 +37,7 @@ export function ProtectedRoute({
     return <Navigate to="/" replace />;
   }
 
-  if (!superAdmin && profile?.status === "pending") {
-    return <Navigate to="/pending-approval" replace />;
-  }
-
-  if (!superAdmin && profile?.status === "rejected") {
+  if (!superAdmin && (profile?.status === "pending" || profile?.status === "rejected" || !profile)) {
     return <Navigate to="/pending-approval" replace />;
   }
 

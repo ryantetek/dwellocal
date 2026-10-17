@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
-import { clearPendingProperty, readPendingProperty } from "@/lib/oauth";
+import { SOCIAL_AUTH_ENABLED, clearPendingProperty, readPendingProperty } from "@/lib/oauth";
 import { createPropertyWithSeed } from "@/lib/seed";
 import { supabase } from "@/lib/supabase";
 
@@ -67,8 +67,12 @@ export function LoginPage() {
           {busy ? "Signing in…" : "Log in"}
         </Button>
       </form>
-      <p className="my-4 text-center text-xs uppercase tracking-[0.14em] text-dwell-muted">or</p>
-      <SocialAuthButtons onError={setError} />
+      {SOCIAL_AUTH_ENABLED ? (
+        <>
+          <p className="my-4 text-center text-xs uppercase tracking-[0.14em] text-dwell-muted">or</p>
+          <SocialAuthButtons onError={setError} />
+        </>
+      ) : null}
       <p className="mt-4 text-sm text-dwell-muted">
         <Link to="/forgot-password" className="underline">
           Forgot password
@@ -205,14 +209,29 @@ export function ResetPasswordPage() {
   );
 }
 
-export function PendingApprovalPage() {
-  const { profile, signOut } = useAuth();
+function VerificationWait({
+  title,
+  rejected,
+}: {
+  title: string;
+  rejected?: boolean;
+}) {
+  const { signOut, refreshProfile } = useAuth();
+
+  useEffect(() => {
+    if (rejected) return;
+    const tick = window.setInterval(() => {
+      void refreshProfile();
+    }, 8000);
+    return () => window.clearInterval(tick);
+  }, [refreshProfile, rejected]);
+
   return (
-    <AuthShell title="Access pending">
+    <AuthShell title={title}>
       <p className="text-sm leading-relaxed text-dwell-muted">
-        {profile?.status === "rejected"
+        {rejected
           ? "This account was not approved. Contact support if you believe this is a mistake."
-          : "Your signup is in a short review queue. A Super Admin will approve access before you can open the dashboard."}
+          : "Your email is signed in, but a Super Admin has not enabled this account yet. The verification process is still ongoing. You can leave this page open — it will continue automatically once you are approved."}
       </p>
       <Button className="mt-6 w-full" variant="outline" onClick={() => void signOut()}>
         Sign out
@@ -221,14 +240,30 @@ export function PendingApprovalPage() {
   );
 }
 
+export function PendingApprovalPage() {
+  const { profile, extrasReady } = useAuth();
+  if (extrasReady && profile?.status === "approved") {
+    return <Navigate to="/after-login" replace />;
+  }
+  return (
+    <VerificationWait
+      title="Verification still ongoing"
+      rejected={profile?.status === "rejected"}
+    />
+  );
+}
+
 export function AfterLoginPage() {
-  const { ready, user, profile, isSuperAdmin } = useAuth();
+  const { ready, extrasReady, user, profile, isSuperAdmin } = useAuth();
   const [checked, setChecked] = useState(false);
   const [hasProperty, setHasProperty] = useState(false);
+  const awaitingApproval =
+    profile?.status === "pending" ||
+    profile?.status === "rejected" ||
+    (extrasReady && Boolean(user) && !profile && !isSuperAdmin);
 
   useEffect(() => {
-    if (!ready || !user || isSuperAdmin) return;
-    if (profile?.status === "pending" || profile?.status === "rejected") return;
+    if (!ready || !user || isSuperAdmin || awaitingApproval) return;
     if (!supabase) {
       setChecked(true);
       return;
@@ -255,15 +290,28 @@ export function AfterLoginPage() {
       setHasProperty(Boolean(count));
       setChecked(true);
     })();
-  }, [isSuperAdmin, profile?.status, ready, user]);
+  }, [awaitingApproval, isSuperAdmin, profile?.status, ready, user]);
 
-  if (!ready) return <AuthShell title="Signing you in">Loading…</AuthShell>;
-  if (!user) return <Navigate to="/login" replace />;
-  if (isSuperAdmin) return <Navigate to="/super-admin" replace />;
-  if (profile?.status === "pending" || profile?.status === "rejected") {
-    return <Navigate to="/pending-approval" replace />;
+  if (!user && !ready) {
+    return (
+      <AuthShell title="Signing you in">
+        <p className="text-sm leading-relaxed text-dwell-muted">Checking your session…</p>
+      </AuthShell>
+    );
   }
-  if (!checked) return <AuthShell title="Preparing your workspace">Loading…</AuthShell>;
+  if (ready && !user) return <Navigate to="/login" replace />;
+  if (isSuperAdmin) return <Navigate to="/super-admin" replace />;
+  if (user && !extrasReady && profile?.status !== "approved") {
+    return <VerificationWait title="Verification still ongoing" />;
+  }
+  if (awaitingApproval) return <Navigate to="/pending-approval" replace />;
+  if (!checked) {
+    return (
+      <AuthShell title="Preparing your workspace">
+        <p className="text-sm leading-relaxed text-dwell-muted">Opening your property workspace…</p>
+      </AuthShell>
+    );
+  }
   if (!hasProperty) return <Navigate to="/admin/onboarding" replace />;
   return <Navigate to="/admin" replace />;
 }

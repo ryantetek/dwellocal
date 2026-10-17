@@ -1,5 +1,8 @@
 import { supabase } from "@/lib/supabase";
 
+/** Flip to true when Google / Facebook providers are ready in Supabase. */
+export const SOCIAL_AUTH_ENABLED = false;
+
 const PENDING_KEY = "dwellocal.pendingProperty";
 
 export function stashPendingProperty(name: string, slug?: string) {
